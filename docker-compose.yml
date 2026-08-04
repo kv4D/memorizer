@@ -1,0 +1,14 @@
+services:
+  backend:
+    container_name: api
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - backend-venv:/app/.venv
+
+volumes:
+  backend-venv:
