@@ -1,14 +1,57 @@
 services:
-  backend:
+  file_storage:
+    container_name: file_storage
+    image: minio/minio:latest
+    restart: unless-stopped
+    environment:
+      - MINIO_ROOT_USER=${FILE_STORAGE_USER}
+      - MINIO_ROOT_PASSWORD=${FILE_STORAGE_PASSWORD}
+      - MINIO_BUCKET=${FILE_STORAGE_BUCKET}
+    command: server /data --console-address ":9001"
+    ports:
+      - "${FILE_STORAGE_PORT_PUBLIC}:${FILE_STORAGE_PORT_PRIVATE}"
+      - "9001:9001"
+    volumes:
+      - file_storage_data:/data
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "${FILE_STORAGE_INTERNAL_ENDPOINT}/minio/health/live" ]
+      interval: 1s
+      timeout: 5s
+      retries: 5
+
+  database:
+    container_name: database
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_DB=${DATABASE_NAME}
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    ports:
+      - "${DATABASE_PORT_PUBLIC:-5432}:${DATABASE_PORT_PRIVATE:-5432}"
+    volumes:
+      - database_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DATABASE_USER} -d ${DATABASE_NAME}" ]
+      interval: 1s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      - file_storage
+
+  api:
     container_name: api
     build:
-      context: ./backend
+      context: ./api
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      - "${API_PORT}:${API_PORT}"
     volumes:
-      - ./backend:/app
-      - backend-venv:/app/.venv
+      - ./api:/app
+      - api-venv:/app/.venv
+    depends_on:
+      - database
 
   frontend:
     container_name: frontend
@@ -16,11 +59,13 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "5173:5173"
+      - "${FRONTEND_PORT_PUBLIC:-5173}:${FRONTEND_PORT_PRIVATE:-5173}"
     volumes:
-      - ./frontend:/app  
+      - ./frontend:/app
     depends_on:
-      - backend    
+      - api
 
 volumes:
-  backend-venv:
+  api-venv:
+  database_data:
+  file_storage_data:
