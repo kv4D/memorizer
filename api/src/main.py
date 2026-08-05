@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 import uvicorn
 
-from users.api import users_router
-from core.configs import api_settings
+from src.users.api import users_router
+from src.core.configs import api_settings
 
 
 app = FastAPI(

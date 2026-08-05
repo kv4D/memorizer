@@ -28,6 +28,8 @@ dependencies = [
     "typing_extensions==4.16.0",
     "uvicorn==0.52.1",
     "alembic>=1.18.5",
+    "jose>=1.0.0",
+    "pwdlib>=0.3.0",
 ]
 
 [tool.uv]
