@@ -28,6 +28,26 @@ class APISettings(BaseSettings):
                                       extra='ignore')
 
 
-print("HERE", ENV_PATH)
+class DatabaseSettings(BaseSettings):
+    """Database settings."""
+
+    DATABASE_HOST: str
+    DATABASE_PORT_PRIVATE: int
+    DATABASE_PORT_PUBLIC: int
+
+    DATABASE_USER: str
+    DATABASE_PASSWORD: str
+    DATABASE_NAME:  str
+
+    model_config = SettingsConfigDict(env_file=ENV_PATH,
+                                      env_file_encoding='utf-8',
+                                      extra='ignore')
+
+    @classmethod
+    def get_database_url(cls) -> str:
+        """Get database url."""
+        url = f"postgresql+asyncpg://{cls.DATABASE_USER}:postgres@db:5432/"
+
 # import these settings in other modules
-api_settings = APISettings() # type: ignore
+api_settings = APISettings()  # type: ignore
+database_settings = DatabaseSettings()  # type: ignore
