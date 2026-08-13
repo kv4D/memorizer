@@ -1,10 +1,10 @@
 """Security related tools."""
 from datetime import datetime, timedelta, timezone
 from typing import Any
-from jose import jwt
+import jwt
 from pwdlib import PasswordHash
 
-from configs import api_settings
+from .configs import api_settings
 
 
 def _generate_jwt_token(data: dict) -> str:
@@ -17,10 +17,9 @@ def _generate_jwt_token(data: dict) -> str:
     Returns:
         str: the token
     """
-    to_encode = data.copy() if data else {}
     # TODO: maybe add data checks
     token = jwt.encode(
-        to_encode,
+        data,
         key=api_settings.API_SECRET_KEY,
         algorithm=api_settings.API_ALGORITHM
     )
@@ -75,6 +74,21 @@ def generate_refresh_token(sub: Any, data: dict | None = None) -> str:
     )
     refresh_token = _generate_jwt_token(data_to_encode)
     return refresh_token
+
+
+def decode_token(token: str) -> dict:
+    """Decodes a token.
+
+    Args:
+        token (str): the token you have (access or refresh)
+
+    Returns:
+        dict: payload, data that was extracted from a decoded token
+    """
+    payload = jwt.decode(token,
+                         api_settings.API_SECRET_KEY,
+                         algorithms=[api_settings.API_ALGORITHM])
+    return payload
 
 
 PASSWORDS_HASH = PasswordHash.recommended()

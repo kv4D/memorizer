@@ -14,6 +14,10 @@ app = FastAPI(
 # add routers here
 app.include_router(users_router)
 
+@app.get("/")
+async def ping():
+    return "pong"
+
 def main() -> None:
     """The main function to run the FastAPI application."""
     uvicorn.run(

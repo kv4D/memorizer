@@ -2,6 +2,7 @@ from .configs import database_settings
 from sqlmodel import SQLModel, Field, select
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
+from sqlalchemy import TIMESTAMP
 from datetime import timezone, datetime
 from typing import Type, TypeVar, Generic
 from uuid import UUID, uuid4
@@ -22,11 +23,13 @@ class BaseModel(SQLModel, table=False):
     """
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     created_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc)
+        default_factory=lambda: datetime.now(timezone.utc),
+        sa_type=TIMESTAMP(timezone=True)
     )
     updated_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
-        sa_column_kwargs={"onupdate": lambda: datetime.now(timezone.utc)}
+        sa_column_kwargs={"onupdate": lambda: datetime.now(timezone.utc)},
+        sa_type=TIMESTAMP(timezone=True)
     )
 
 
