@@ -13,6 +13,8 @@ from src.core.database import BaseModel
 from src.core.configs import database_settings
 
 from src.users.models import User, RefreshToken
+from src.storage.models import File, FileStatus
+from src.memoryspaces.models import Memoryspace, Chat, Message
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
