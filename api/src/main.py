@@ -4,7 +4,10 @@ import uvicorn
 
 from src.users.api import users_router
 from src.memoryspaces.api import memoryspaces_router
+from src.chats.api import chats_router
 from src.storage.api import storage_router
+from src.generation.api import generation_router
+
 from src.core.configs import api_settings
 
 
@@ -28,6 +31,8 @@ app = FastAPI(
 app.include_router(users_router)
 app.include_router(memoryspaces_router)
 app.include_router(storage_router)
+app.include_router(generation_router)
+app.include_router(chats_router)
 
 
 @app.get("/")

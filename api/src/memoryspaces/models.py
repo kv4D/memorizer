@@ -4,20 +4,8 @@ from src.core.database import BaseModel
 
 
 class Memoryspace(BaseModel, table=True):
+    name: str = Field(nullable=False)
+    description: str
     owner_id: UUID = Field(
         index=True, nullable=False, foreign_key="user.id", ondelete="CASCADE"
-    )
-
-
-class Chat(BaseModel, table=True):
-    name: str = Field(nullable=False, unique=True)
-    memoryspace_id: UUID = Field(
-        index=True, nullable=False, foreign_key="memoryspace.id", ondelete="CASCADE"
-    )
-
-
-class Message(BaseModel, table=True):
-    content: str = Field(nullable=False)
-    chat_id: UUID = Field(
-        index=True, nullable=False, foreign_key="chat.id", ondelete="CASCADE"
     )

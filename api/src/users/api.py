@@ -5,17 +5,15 @@ from fastapi.security import OAuth2PasswordRequestForm
 from src.core.database import unit_of_work
 from src.core.dependencies import get_current_user_from_access_token
 from .services import UsersService
-from .schemas import (
-    RegistrationRequest,
-    TokenResponse
-)
-
+from .schemas import RegistrationRequest, TokenResponse, UserResponse
 
 users_router = APIRouter(prefix="/users", tags=["users"])
 
 
-@users_router.get("/me")
-async def get_current_user_info(user_id: UUID = Depends(get_current_user_from_access_token)):
+@users_router.get("/me", response_model=UserResponse)
+async def get_current_user_info(
+    user_id: UUID = Depends(get_current_user_from_access_token),
+):
     async with unit_of_work() as session:
         service = UsersService(session)
         user = await service.get_user(user_id)
@@ -36,7 +34,9 @@ async def login(user_data: OAuth2PasswordRequestForm = Depends()):
 async def register(user_data: RegistrationRequest):
     async with unit_of_work() as session:
         service = UsersService(session)
-        access_token, refresh_token = await service.register_user(**user_data.model_dump(exclude_unset=True))
+        access_token, refresh_token = await service.register_user(
+            **user_data.model_dump(exclude_unset=True)
+        )
     return TokenResponse(access_token=access_token, refresh_token=refresh_token)
 
 

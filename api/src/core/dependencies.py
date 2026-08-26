@@ -28,12 +28,18 @@ async def _get_user_id_from_token(token: str):
 
 
 async def get_current_user_from_access_token(
-    access_token: str = Depends(oauth2_scheme)
+    access_token: str = Depends(oauth2_scheme),
 ) -> UUID:
+    """
+    Get current user from access token.
+
+    Use to get user ID or to check if user is logged in.
+    """
     return await _get_user_id_from_token(access_token)
 
 
-async def get_current_user_from_refresh_token(
-    refresh_token: str
-) -> UUID:
+async def get_current_user_from_refresh_token(refresh_token: str) -> UUID:
+    """
+    Get current user from refresh token.
+    """
     return await _get_user_id_from_token(refresh_token)
