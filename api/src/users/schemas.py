@@ -1,5 +1,6 @@
+from uuid import UUID
 from datetime import date, datetime
-from sqlmodel import SQLModel, Field
+from sqlmodel import SQLModel
 from pydantic import EmailStr
 
 
@@ -19,6 +20,7 @@ class TokenResponse(SQLModel):
 
 
 class UserResponse(SQLModel):
+    id: UUID
     email: str
     name: str
     date_of_birth: date

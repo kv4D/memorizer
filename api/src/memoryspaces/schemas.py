@@ -22,6 +22,7 @@ class MemoryspaceEditRequest(SQLModel):
 
 # response schemas
 class MemoryspaceResponse(SQLModel):
+    id: UUID
     name: str
     description: str
     owner_id: UUID
