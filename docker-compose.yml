@@ -40,17 +40,17 @@ services:
     depends_on:
       - file_storage
 
-  api:
-    container_name: api
+  core_api:
+    container_name: core_api
     restart: unless-stopped
     build:
-      context: ./api
+      context: ./core_api
       dockerfile: Dockerfile
     ports:
       - "${API_PORT}:${API_PORT}"
     volumes:
-      - ./api:/app
-      - api_venv:/app/.venv
+      - ./core_api:/app
+      - core_api_venv:/app/.venv
     env_file:
       - .env
     depends_on:
@@ -69,7 +69,7 @@ services:
     env_file:
       - .env
     depends_on:
-      - api
+      - core_api
 
   node-exporter:
     container_name: node-exporter
@@ -87,7 +87,7 @@ services:
     ports:
       - "${NODE_EXPORTER_PORT_PUBLIC:-9100}:${NODE_EXPORTER_PORT_PRIVATE:-9100}"
     depends_on:
-      - api
+      - core_api
 
   prometheus:
     container_name: prometheus
@@ -116,8 +116,23 @@ services:
     depends_on:
       - prometheus
 
+  ai_service:
+    container_name: ai_service
+    restart: unless-stopped
+    build:
+      context: ./ai_service
+      dockerfile: Dockerfile
+    ports:
+      - "${AI_SERVICE_PORT}:${AI_SERVICE_PORT}"
+    volumes:
+      - ./ai_service:/app
+      - ai_service_venv:/app/.venv
+    env_file:
+      - .env
+
 volumes:
-  api_venv:
+  core_api_venv:
+  ai_service_venv:
   database_data:
   file_storage_data:
   prometheus_data:

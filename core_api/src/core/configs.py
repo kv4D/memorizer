@@ -1,7 +1,7 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # path to the env file
-ENV_PATH = '.env'
+ENV_PATH = ".env"
 
 
 class APISettings(BaseSettings):
@@ -21,9 +21,9 @@ class APISettings(BaseSettings):
 
     DEBUG_MODE: bool = True
 
-    model_config = SettingsConfigDict(env_file=ENV_PATH,
-                                      env_file_encoding='utf-8',
-                                      extra='ignore')
+    model_config = SettingsConfigDict(
+        env_file=ENV_PATH, env_file_encoding="utf-8", extra="ignore"
+    )
 
 
 class DatabaseSettings(BaseSettings):
@@ -37,9 +37,9 @@ class DatabaseSettings(BaseSettings):
     DATABASE_PASSWORD: str
     DATABASE_NAME: str
 
-    model_config = SettingsConfigDict(env_file=ENV_PATH,
-                                      env_file_encoding='utf-8',
-                                      extra='ignore')
+    model_config = SettingsConfigDict(
+        env_file=ENV_PATH, env_file_encoding="utf-8", extra="ignore"
+    )
 
     def get_database_url(self) -> str:
         """Get database url."""
@@ -50,4 +50,3 @@ class DatabaseSettings(BaseSettings):
 # import these settings in other modules
 api_settings = APISettings()  # type: ignore
 database_settings = DatabaseSettings()  # type: ignore
-

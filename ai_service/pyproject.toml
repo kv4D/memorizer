@@ -1,0 +1,23 @@
+[project]
+name = "ai-service"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "withered", email = "sergeyzezyanov1@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.141.1",
+    "llama-index>=0.14.24",
+    "pydantic-settings>=2.15.0",
+    "taskiq>=0.12.6",
+    "uvicorn>=0.52.4",
+]
+
+[tool.uv]
+package = false
+
+[build-system]
+requires = ["uv_build>=0.12.3,<0.13.0"]
+build-backend = "uv_build"
