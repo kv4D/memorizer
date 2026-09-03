@@ -2,12 +2,17 @@ from fastapi import FastAPI
 import uvicorn
 from contextlib import asynccontextmanager
 
-from .configs import settings
+from .configs import service_settings
+from .message_broker import message_broker
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    if not message_broker.is_worker_process:
+        await message_broker.startup()
     yield
+    if not message_broker.is_worker_process:
+        await message_broker.shutdown()
 
 
 app = FastAPI(
@@ -19,9 +24,17 @@ app = FastAPI(
 
 
 @app.get("/")
-def ping():
-    return "pong"
+async def ping():
+    from .tasks import test_task
+    task = await test_task.kiq()
+    # Wait for the result.
+    result = await task.wait_result()
+    return result
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, port=settings.AI_SERVICE_PORT, host=settings.AI_SERVICE_HOST)
+    uvicorn.run(
+        app,
+        port=service_settings.AI_SERVICE_PORT,
+        host=service_settings.AI_SERVICE_HOST,
+    )

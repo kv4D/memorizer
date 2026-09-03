@@ -14,7 +14,7 @@ services:
     volumes:
       - file_storage_data:/data
     healthcheck:
-      test: [ "CMD", "curl", "-f", "${FILE_STORAGE_INTERNAL_ENDPOINT}/minio/health/live" ]
+      test: [ "CMD", "curl", "-f", "${FILE_STORAGE_INTERNAL_URL}/minio/health/live" ]
       interval: 1s
       timeout: 5s
       retries: 5
@@ -104,6 +104,37 @@ services:
     depends_on:
       - node-exporter
 
+  message_broker:
+    container_name: message_broker
+    image: redis:latest
+    restart: unless-stopped
+    command: [ "redis-server", "--port", "6380", "--requirepass", "${MESSAGE_BROKER_PASSWORD}", "--appendonly", "yes" ]
+    ports:
+      - "${MESSAGE_BROKER_PORT_PRIVATE:-6380}:${MESSAGE_BROKER_PORT_PUBLIC:-6380}"
+    volumes:
+      - message_broker_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-p", "${MESSAGE_BROKER_PORT_PUBLIC:-6380}", "-a", "$MESSAGE_BROKER_PASSWORD", "ping" ]
+      interval: 1s
+      timeout: 5s
+      retries: 5
+
+  ai_runner:
+    container_name: ai_runner
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    ports:
+      - "${AI_RUNNER_PORT_PRIVATE:-11434}:${AI_RUNNER_PORT_PUBLIC:-11434}"
+    volumes:
+      - ai_runner_data:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [ gpu ]
+
   grafana:
     container_name: grafana
     image: grafana/grafana:latest
@@ -129,6 +160,24 @@ services:
       - ai_service_venv:/app/.venv
     env_file:
       - .env
+    environment:
+      MESSAGE_BROKER_URL: "redis://:${MESSAGE_BROKER_PASSWORD}@message_broker:${MESSAGE_BROKER_PORT_PRIVATE}"
+      RESULT_BACKEND_URL: "redis://:${MESSAGE_BROKER_PASSWORD}@message_broker:${MESSAGE_BROKER_PORT_PRIVATE}"
+
+  ai_service_worker:
+    container_name: ai_service_worker
+    restart: unless-stopped
+    build:
+      context: ./ai_service
+      dockerfile: Dockerfile.worker
+    volumes:
+      - ./ai_service:/app
+      - ai_service_venv:/app/.venv
+    env_file:
+      - .env
+    environment:
+      MESSAGE_BROKER_URL: "redis://:${MESSAGE_BROKER_PASSWORD}@message_broker:${MESSAGE_BROKER_PORT_PRIVATE}"
+      RESULT_BACKEND_URL: "redis://:${MESSAGE_BROKER_PASSWORD}@message_broker:${MESSAGE_BROKER_PORT_PRIVATE}"
 
 volumes:
   core_api_venv:
@@ -136,3 +185,5 @@ volumes:
   database_data:
   file_storage_data:
   prometheus_data:
+  message_broker_data:
+  ai_runner_data:

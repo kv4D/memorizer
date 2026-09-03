@@ -25,10 +25,12 @@ WORKDIR /app
 
 # copy the virtual environment from the builder stage
 COPY --from=builder /app/.venv /app/.venv
+
+COPY --from=builder /app/src /app/src
 ENV PATH="/app/.venv/bin:$PATH"
 
 # the port that the app runs on
-EXPOSE 8100
+EXPOSE 8200
 
-RUN echo "AI service is starting!"
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8100", "--reload"]
+RUN echo "AI service worker is starting!"
+CMD ["taskiq", "worker", "src.message_broker:message_broker", "src.tasks", "--use-process-pool"]
